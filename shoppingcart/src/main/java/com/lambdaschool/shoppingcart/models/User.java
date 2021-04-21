@@ -2,10 +2,14 @@ package com.lambdaschool.shoppingcart.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -170,6 +174,12 @@ public class User
      */
     public void setPassword(String password)
     {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
+    }
+
+    public void setPasswordNoEncrypt(String password)
+    {
         this.password = password;
     }
 
@@ -191,6 +201,21 @@ public class User
     public void setRoles(Set<UserRoles> roles)
     {
         this.roles = roles;
+    }
+
+    /**
+     * Gets the user roles in an understandable format for spring
+     */
+    @JsonIgnoreProperties(value = "user")
+    public List<SimpleGrantedAuthority> getAuthority(){
+        List<SimpleGrantedAuthority> returnList = new ArrayList<>();
+
+        for(UserRoles userroles : this.roles){
+            String theRole = "ROLE_" + userroles.getRole().getName().toUpperCase();
+            returnList.add(new SimpleGrantedAuthority(theRole));
+        }
+
+        return returnList;
     }
 
     public String getComments()

@@ -6,12 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.Security;
 import java.util.List;
 
 /**
@@ -201,5 +203,14 @@ public class UserController
     {
         userService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/myinfo", produces = "application/json")
+    public ResponseEntity<?> getActiveUserInfo(){
+        String uname = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userService.findByName(uname);
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 }
